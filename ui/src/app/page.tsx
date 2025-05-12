@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { CornerDownLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ChatBubble, ChatBubbleAvatar, ChatBubbleMessage } from '@/components/ui/chat-bubble';
@@ -11,6 +11,14 @@ export default function ChatPage() {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<{ role: 'user' | 'bot'; text: string }[]>([]);
   const [loading, setLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  // Scroll to bottom when messages change
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages, loading]);
 
   // Handle sending a message
   async function handleSend(e?: React.FormEvent) {
@@ -39,7 +47,7 @@ export default function ChatPage() {
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 p-4">
       <div className="w-full max-w-xl bg-zinc-950/80 rounded-2xl shadow-2xl p-0 flex flex-col gap-0 border border-zinc-800">
         {/* Chat messages */}
-        <div className="flex-1 min-h-[400px] max-h-[600px] h-[400px]">
+        <div className="flex-1 min-h-[400px] max-h-[600px] h-[400px] overflow-y-auto px-2 py-4">
           <ChatMessageList>
             {messages.length === 0 && (
               <div className="text-zinc-500 text-center pt-12">Start the conversation!</div>
@@ -47,7 +55,7 @@ export default function ChatPage() {
             {messages.map((msg, idx) => (
               <ChatBubble key={idx} variant={msg.role === 'user' ? 'sent' : 'received'}>
                 <ChatBubbleAvatar
-                  fallback={msg.role === 'user' ? 'US' : 'AI'}
+                  fallback={msg.role === 'user' ? 'U' : 'A'}
                 />
                 <ChatBubbleMessage variant={msg.role === 'user' ? 'sent' : 'received'}>
                   {msg.text}
@@ -60,6 +68,7 @@ export default function ChatPage() {
                 <ChatBubbleMessage isLoading />
               </ChatBubble>
             )}
+            <div ref={messagesEndRef} />
           </ChatMessageList>
         </div>
         {/* Input bar */}
