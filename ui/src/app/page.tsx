@@ -1,5 +1,10 @@
 'use client';
 import { useState } from 'react';
+import { Paperclip, Mic, CornerDownLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ChatBubble, ChatBubbleAvatar, ChatBubbleMessage } from '@/components/ui/chat-bubble';
+import { ChatMessageList } from '@/components/ui/chat-message-list';
+import { ChatInput } from '@/components/ui/chat-input';
 
 export default function ChatPage() {
   // State for user input and chat history
@@ -22,40 +27,81 @@ export default function ChatPage() {
     }, 800);
   }
 
+  // Handle file and mic actions (future features)
+  function handleAttachFile() {
+    // TODO: Implement file attachment
+  }
+  function handleMicrophoneClick() {
+    // TODO: Implement voice input
+  }
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 p-4">
-      <div className="w-full max-w-md bg-white rounded shadow p-4 flex flex-col gap-4">
-        <div className="flex-1 overflow-y-auto min-h-[300px] max-h-[400px] border-b pb-2 mb-2">
-          {messages.length === 0 && (
-            <div className="text-gray-400 text-center">Start the conversation!</div>
-          )}
-          {messages.map((msg, idx) => (
-            <div key={idx} className={msg.role === 'user' ? 'text-right' : 'text-left'}>
-              <span className={msg.role === 'user' ? 'bg-blue-100 text-blue-800 rounded px-2 py-1 inline-block my-1' : 'bg-gray-200 text-gray-800 rounded px-2 py-1 inline-block my-1'}>
-                {msg.text}
-              </span>
-            </div>
-          ))}
-          {loading && <div className="text-gray-400 text-sm">Bot is typing...</div>}
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 p-4">
+      <div className="w-full max-w-xl bg-zinc-950/80 rounded-2xl shadow-2xl p-0 flex flex-col gap-0 border border-zinc-800">
+        {/* Chat messages */}
+        <div className="flex-1 min-h-[400px] max-h-[600px] h-[400px]">
+          <ChatMessageList>
+            {messages.length === 0 && (
+              <div className="text-zinc-500 text-center pt-12">Start the conversation!</div>
+            )}
+            {messages.map((msg, idx) => (
+              <ChatBubble key={idx} variant={msg.role === 'user' ? 'sent' : 'received'}>
+                <ChatBubbleAvatar
+                  src={msg.role === 'user'
+                    ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=64&h=64&q=80&crop=faces&fit=crop'
+                    : 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=64&h=64&q=80&crop=faces&fit=crop'}
+                  fallback={msg.role === 'user' ? 'US' : 'AI'}
+                />
+                <ChatBubbleMessage variant={msg.role === 'user' ? 'sent' : 'received'}>
+                  {msg.text}
+                </ChatBubbleMessage>
+              </ChatBubble>
+            ))}
+            {loading && (
+              <ChatBubble variant="received">
+                <ChatBubbleAvatar src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=64&h=64&q=80&crop=faces&fit=crop" fallback="AI" />
+                <ChatBubbleMessage isLoading />
+              </ChatBubble>
+            )}
+          </ChatMessageList>
         </div>
-        <form onSubmit={handleSend} className="flex gap-2">
-          <input
-            className="flex-1 border rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-300"
-            type="text"
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            placeholder="Type your message..."
-            disabled={loading}
-            autoFocus
-          />
-          <button
-            className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
-            type="submit"
-            disabled={loading || !input.trim()}
-          >
-            Send
-          </button>
-        </form>
+        {/* Input bar */}
+        <div className="p-4 border-t border-zinc-800 bg-zinc-950/90">
+          <form onSubmit={handleSend} className="relative rounded-lg border bg-zinc-900 focus-within:ring-1 focus-within:ring-violet-500 p-1">
+            <ChatInput
+              value={input}
+              onChange={e => setInput(e.target.value)}
+              placeholder="Type your message..."
+              className="min-h-12 resize-none rounded-lg bg-zinc-900 border-0 p-3 shadow-none focus-visible:ring-0 text-zinc-100"
+              disabled={loading}
+              autoFocus
+            />
+            <div className="flex items-center p-3 pt-0 justify-between">
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  type="button"
+                  onClick={handleAttachFile}
+                >
+                  <Paperclip className="size-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  type="button"
+                  onClick={handleMicrophoneClick}
+                >
+                  <Mic className="size-4" />
+                </Button>
+              </div>
+              <Button type="submit" size="sm" className="ml-auto gap-1.5" disabled={loading || !input.trim()}>
+                Send
+                <CornerDownLeft className="size-3.5" />
+              </Button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
