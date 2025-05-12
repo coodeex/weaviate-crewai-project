@@ -28,11 +28,20 @@ export default function ChatPage() {
     setMessages((msgs) => [...msgs, { role: 'user', text: userMessage }]);
     setInput('');
     setLoading(true);
-    // Simulate bot response (replace with real API call)
-    setTimeout(() => {
-      setMessages((msgs) => [...msgs, { role: 'bot', text: `Echo: ${userMessage}` }]);
+    try {
+      const res = await fetch('http://localhost:8000/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userMessage }),
+      });
+      if (!res.ok) throw new Error('Network response was not ok');
+      const data = await res.json();
+      setMessages((msgs) => [...msgs, { role: 'bot', text: data.response }]);
+    } catch (err: any) {
+      setMessages((msgs) => [...msgs, { role: 'bot', text: 'Error: ' + (err.message || 'Unknown error') }]);
+    } finally {
       setLoading(false);
-    }, 800);
+    }
   }
 
   // Handle Enter/Shift+Enter in textarea

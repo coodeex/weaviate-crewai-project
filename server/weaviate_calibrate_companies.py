@@ -5,7 +5,7 @@ from weaviate.classes.config import Configure, Property, DataType
 from weaviate.agents.query import QueryAgent
 from weaviate.agents.utils import print_query_agent_response
 from dotenv import load_dotenv
-from company_data import COMPANY_DATA
+from server.company_data import COMPANY_DATA
 import argparse
 
 # Load environment variables
@@ -179,6 +179,23 @@ def run_example_queries(agent, example_numbers):
         print("\n=== Example Query 2: Crew AI Information ===")
         response = agent.run("What is Crew AI? Can you tell me about its features and capabilities?")
         print_query_agent_response(response)
+
+def query_weaviate_agent(prompt: str) -> str:
+    """Query the Weaviate agent with a single prompt and return the response as a string."""
+    client = None
+    try:
+        client = setup_weaviate_client()
+        agent = setup_agent(client)
+        response = agent.run(prompt)
+        # The response may be a dict or object; get the text/answer part
+        if isinstance(response, dict) and 'answer' in response:
+            return response['answer']
+        return str(response)
+    except Exception as e:
+        return f"Error: {str(e)}"
+    finally:
+        if client:
+            client.close()
 
 def main():
     """Main function to run the complete example."""
