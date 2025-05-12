@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { Paperclip, Mic, CornerDownLeft } from 'lucide-react';
+import { CornerDownLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ChatBubble, ChatBubbleAvatar, ChatBubbleMessage } from '@/components/ui/chat-bubble';
 import { ChatMessageList } from '@/components/ui/chat-message-list';
@@ -13,8 +13,8 @@ export default function ChatPage() {
   const [loading, setLoading] = useState(false);
 
   // Handle sending a message
-  async function handleSend(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSend(e?: React.FormEvent) {
+    if (e) e.preventDefault();
     if (!input.trim()) return;
     const userMessage = input;
     setMessages((msgs) => [...msgs, { role: 'user', text: userMessage }]);
@@ -27,12 +27,12 @@ export default function ChatPage() {
     }, 800);
   }
 
-  // Handle file and mic actions (future features)
-  function handleAttachFile() {
-    // TODO: Implement file attachment
-  }
-  function handleMicrophoneClick() {
-    // TODO: Implement voice input
+  // Handle Enter/Shift+Enter in textarea
+  function handleInputKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
   }
 
   return (
@@ -47,9 +47,6 @@ export default function ChatPage() {
             {messages.map((msg, idx) => (
               <ChatBubble key={idx} variant={msg.role === 'user' ? 'sent' : 'received'}>
                 <ChatBubbleAvatar
-                  src={msg.role === 'user'
-                    ? 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=64&h=64&q=80&crop=faces&fit=crop'
-                    : 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=64&h=64&q=80&crop=faces&fit=crop'}
                   fallback={msg.role === 'user' ? 'US' : 'AI'}
                 />
                 <ChatBubbleMessage variant={msg.role === 'user' ? 'sent' : 'received'}>
@@ -59,7 +56,7 @@ export default function ChatPage() {
             ))}
             {loading && (
               <ChatBubble variant="received">
-                <ChatBubbleAvatar src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=64&h=64&q=80&crop=faces&fit=crop" fallback="AI" />
+                <ChatBubbleAvatar fallback="AI" />
                 <ChatBubbleMessage isLoading />
               </ChatBubble>
             )}
@@ -71,30 +68,13 @@ export default function ChatPage() {
             <ChatInput
               value={input}
               onChange={e => setInput(e.target.value)}
+              onKeyDown={handleInputKeyDown}
               placeholder="Type your message..."
               className="min-h-12 resize-none rounded-lg bg-zinc-900 border-0 p-3 shadow-none focus-visible:ring-0 text-zinc-100"
               disabled={loading}
               autoFocus
             />
-            <div className="flex items-center p-3 pt-0 justify-between">
-              <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  type="button"
-                  onClick={handleAttachFile}
-                >
-                  <Paperclip className="size-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  type="button"
-                  onClick={handleMicrophoneClick}
-                >
-                  <Mic className="size-4" />
-                </Button>
-              </div>
+            <div className="flex items-center p-3 pt-0 justify-end">
               <Button type="submit" size="sm" className="ml-auto gap-1.5" disabled={loading || !input.trim()}>
                 Send
                 <CornerDownLeft className="size-3.5" />
