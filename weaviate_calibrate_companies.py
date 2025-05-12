@@ -200,11 +200,6 @@ def main():
             delete_collections(client)
             create_collections(client)
             populate_database(client)
-        else:
-            # Create collections if they don't exist
-            create_collections(client)
-            # Populate database
-            populate_database(client)
 
         # Set up agent
         agent = setup_agent(client)
