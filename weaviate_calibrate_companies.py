@@ -6,6 +6,7 @@ from weaviate.agents.query import QueryAgent
 from weaviate.agents.utils import print_query_agent_response
 from dotenv import load_dotenv
 from company_data import COMPANY_DATA
+import argparse
 
 # Load environment variables
 load_dotenv()
@@ -22,6 +23,16 @@ def setup_weaviate_client():
     )
     print(f"Client ready: {client.is_ready()}")
     return client
+
+def delete_collections(client):
+    """Delete existing collections if they exist."""
+    collections = ["CompanyInfo", "Products", "UseCases"]
+    for collection_name in collections:
+        try:
+            client.collections.delete(collection_name)
+            print(f"Deleted collection: {collection_name}")
+        except:
+            print(f"Collection {collection_name} does not exist or could not be deleted")
 
 def create_collections(client):
     """Create the Company collections."""
@@ -100,8 +111,28 @@ def create_collections(client):
         ],
     )
 
+def check_collections_exist(client):
+    """Check if collections already exist and have data."""
+    try:
+        company_info = client.collections.get("CompanyInfo")
+        products = client.collections.get("Products")
+        use_cases = client.collections.get("UseCases")
+        
+        return (
+            len(company_info) > 0 and 
+            len(products) > 0 and 
+            len(use_cases) > 0
+        )
+    except:
+        return False
+
 def populate_database(client):
     """Populate the database with company information."""
+    # Check if collections already exist and have data
+    if check_collections_exist(client):
+        print("Collections already exist and contain data. Skipping data import.")
+        return
+
     # Get collections
     company_info_collection = client.collections.get("CompanyInfo")
     products_collection = client.collections.get("Products")
@@ -132,29 +163,54 @@ def setup_agent(client):
         client=client,
         collections=["CompanyInfo", "Products", "UseCases"],
         system_prompt="You are a helpful assistant that provides information about Weaviate company, its products, and use cases. "
-        "Always provide detailed and accurate information based on the available data.",
+        "Always provide detailed and accurate information based on the available data. "
+        "If you don't have information about a topic, clearly state that the information is not available in the database.",
     )
     return agent
 
+def run_example_queries(agent, example_numbers):
+    """Run specified example queries."""
+    if 1 in example_numbers:
+        print("\n=== Example Query 1: Weaviate Products ===")
+        response = agent.run("What are Weaviate's main products and their descriptions?")
+        print_query_agent_response(response)
+
+    if 2 in example_numbers:
+        print("\n=== Example Query 2: Crew AI Information ===")
+        response = agent.run("What is Crew AI? Can you tell me about its features and capabilities?")
+        print_query_agent_response(response)
+
 def main():
     """Main function to run the complete example."""
+    # Set up argument parser
+    parser = argparse.ArgumentParser(description='Run Weaviate company information examples')
+    parser.add_argument('--examples', type=int, nargs='+', default=[1, 2],
+                      help='Example numbers to run (1: Weaviate Products, 2: Crew AI Information)')
+    parser.add_argument('--reinit', action='store_true',
+                      help='Delete existing collections and reinitialize them')
+    args = parser.parse_args()
+
     try:
         # Set up client
         client = setup_weaviate_client()
 
-        # Create collections
-        create_collections(client)
-
-        # Populate database
-        populate_database(client)
+        # Delete and recreate collections if --reinit flag is set
+        if args.reinit:
+            print("Reinitializing collections...")
+            delete_collections(client)
+            create_collections(client)
+            populate_database(client)
+        else:
+            # Create collections if they don't exist
+            create_collections(client)
+            # Populate database
+            populate_database(client)
 
         # Set up agent
         agent = setup_agent(client)
 
-        # Example query
-        print("\n=== Example Query ===")
-        response = agent.run("What are Weaviate's main products and their descriptions?")
-        print_query_agent_response(response)
+        # Run specified example queries
+        run_example_queries(agent, args.examples)
 
     except Exception as e:
         print(f"An error occurred: {str(e)}")
@@ -164,4 +220,32 @@ def main():
             client.close()
 
 if __name__ == "__main__":
-    main() 
+    main()
+
+"""
+Available Commands:
+
+1. Run all examples (default):
+   python weaviate_calibrate_companies.py
+
+2. Run specific examples:
+   python weaviate_calibrate_companies.py --examples 1
+   python weaviate_calibrate_companies.py --examples 2
+   python weaviate_calibrate_companies.py --examples 1 2
+
+3. Reinitialize collections (wipe and recreate):
+   python weaviate_calibrate_companies.py --reinit
+
+4. Combine reinitialization with specific examples:
+   python weaviate_calibrate_companies.py --reinit --examples 1
+   python weaviate_calibrate_companies.py --reinit --examples 2
+   python weaviate_calibrate_companies.py --reinit --examples 1 2
+
+Example Queries:
+1. Weaviate Products: "What are Weaviate's main products and their descriptions?"
+2. Crew AI Information: "What is Crew AI? Can you tell me about its features and capabilities?"
+
+Note: Make sure your .env file contains the required environment variables:
+WEAVIATE_URL=your_weaviate_url
+WEAVIATE_API_KEY=your_weaviate_api_key
+""" 
