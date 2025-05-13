@@ -35,6 +35,7 @@ export default function ChatPage() {
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState<{ role: 'user' | 'bot'; text: string; fullResponse?: ChatResponse }[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingPhase, setLoadingPhase] = useState<'retrieving' | 'creating' | null>(null);
   const [devMode, setDevMode] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -59,6 +60,13 @@ export default function ChatPage() {
     setMessages((msgs) => [...msgs, { role: 'user', text: userMessage }]);
     setInput('');
     setLoading(true);
+    setLoadingPhase('retrieving');
+    
+    // Set a timeout to change the loading phase after 2 seconds
+    setTimeout(() => {
+      setLoadingPhase('creating');
+    }, 2000);
+
     try {
       const res = await fetch('http://localhost:8000/chat', {
         method: 'POST',
@@ -68,7 +76,6 @@ export default function ChatPage() {
       if (!res.ok) throw new Error('Network response was not ok');
       const data = await res.json();
       
-      // Parse the final answer from the response
       const finalAnswer = parseFinalAnswer(data.response);
       
       setMessages((msgs) => [...msgs, { 
@@ -80,6 +87,7 @@ export default function ChatPage() {
       setMessages((msgs) => [...msgs, { role: 'bot', text: 'Error: ' + (err.message || 'Unknown error') }]);
     } finally {
       setLoading(false);
+      setLoadingPhase(null);
     }
   }
 
@@ -128,7 +136,7 @@ export default function ChatPage() {
                 />
                 <ChatBubbleMessage variant={msg.role === 'user' ? 'sent' : 'received'}>
                   {msg.role === 'bot' && devMode && msg.fullResponse ? (
-                    <pre className="whitespace-pre-wrap overflow-x-auto">
+                    <pre className="whitespace-pre-wrap overflow-x-auto font-normal font-sans">
                       {JSON.stringify(msg.fullResponse, null, 2)}
                     </pre>
                   ) : (
@@ -140,7 +148,9 @@ export default function ChatPage() {
             {loading && (
               <ChatBubble variant="received">
                 <ChatBubbleAvatar fallback="AI" />
-                <ChatBubbleMessage isLoading />
+                <ChatBubbleMessage isLoading>
+                  {loadingPhase === 'retrieving' ? 'Retrieving information...' : 'Creating the answer...'}
+                </ChatBubbleMessage>
               </ChatBubble>
             )}
             <div ref={messagesEndRef} />
