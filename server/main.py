@@ -24,12 +24,7 @@ class CompanyRequest(BaseModel):
 class ChatResponse(BaseModel):
     response: str
 
-@app.post("/chat", response_model=ChatResponse)
-async def chat_endpoint(req: ChatRequest):
-    resp = query_weaviate_agent(req.message)
-    return ChatResponse(response=resp)
-
-@app.post("/company-description")
+@app.post("/company-info")
 async def get_company_description(request: CompanyRequest):
     try:
         crew = CompanyDescriptionRetrievalAutomationCrew()
@@ -37,6 +32,11 @@ async def get_company_description(request: CompanyRequest):
         return {"description": result}
     except Exception as e:
         return {"error": str(e)}
+
+@app.post("/chat", response_model=ChatResponse)
+async def chat_endpoint(req: ChatRequest):
+    resp = query_weaviate_agent(req.message)
+    return ChatResponse(response=resp)
 
 @app.get("/")
 async def root():
