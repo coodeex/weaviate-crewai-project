@@ -67,7 +67,7 @@ COMPANY_DATA = {
                 "sources": []
             },
             {
-                "name": "Opik – LLM Evaluation Platform",
+                "name": "Opik - LLM Evaluation Platform",
                 "description": "Provides tools for evaluating large language models (LLMs).",
                 "sources": []
             }

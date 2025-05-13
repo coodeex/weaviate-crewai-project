@@ -118,12 +118,19 @@ def check_collections_exist(client):
         products = client.collections.get("Products")
         use_cases = client.collections.get("UseCases")
         
-        return (
-            len(company_info) > 0 and 
+        # More stringent check - we expect at least 4 companies
+        has_sufficient_data = (
+            len(company_info) >= 4 and  # At least 4 companies
             len(products) > 0 and 
             len(use_cases) > 0
         )
-    except:
+        
+        if not has_sufficient_data:
+            return False
+            
+        return True
+    except Exception as e:
+        print(f"Error checking collections: {e}")
         return False
 
 def populate_database(client):
@@ -138,18 +145,37 @@ def populate_database(client):
     products_collection = client.collections.get("Products")
     use_cases_collection = client.collections.get("UseCases")
 
-    # Add company info
-    with company_info_collection.batch.fixed_size(batch_size=1) as batch:
+    # Add company info for all companies
+    companies = ["company_info", "comet", "llamaindex", "canva"]
+    with company_info_collection.batch.fixed_size(batch_size=len(companies)) as batch:
+        # Add main Weaviate company info
         batch.add_object(properties=COMPANY_DATA["company_info"])
+        
+        # Add other companies' info
+        for company in ["comet", "llamaindex", "canva"]:
+            if company in COMPANY_DATA and "company_info" in COMPANY_DATA[company]:
+                batch.add_object(properties=COMPANY_DATA[company]["company_info"])
 
-    # Add products
-    with products_collection.batch.fixed_size(batch_size=len(COMPANY_DATA["products"])) as batch:
-        for product in COMPANY_DATA["products"]:
+    # Add products for all companies
+    all_products = []
+    all_products.extend(COMPANY_DATA["products"])
+    for company in ["comet", "llamaindex", "canva"]:
+        if company in COMPANY_DATA and "products" in COMPANY_DATA[company]:
+            all_products.extend(COMPANY_DATA[company]["products"])
+
+    with products_collection.batch.fixed_size(batch_size=len(all_products)) as batch:
+        for product in all_products:
             batch.add_object(properties=product)
 
-    # Add use cases
-    with use_cases_collection.batch.fixed_size(batch_size=len(COMPANY_DATA["use_cases"])) as batch:
-        for use_case in COMPANY_DATA["use_cases"]:
+    # Add use cases for all companies
+    all_use_cases = []
+    all_use_cases.extend(COMPANY_DATA["use_cases"])
+    for company in ["comet", "llamaindex", "canva"]:
+        if company in COMPANY_DATA and "use_cases" in COMPANY_DATA[company]:
+            all_use_cases.extend(COMPANY_DATA[company]["use_cases"])
+
+    with use_cases_collection.batch.fixed_size(batch_size=len(all_use_cases)) as batch:
+        for use_case in all_use_cases:
             batch.add_object(properties=use_case)
 
     # Print collection sizes

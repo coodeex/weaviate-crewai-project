@@ -148,8 +148,13 @@ export default function ChatPage() {
             {loading && (
               <ChatBubble variant="received">
                 <ChatBubbleAvatar fallback="AI" />
-                <ChatBubbleMessage isLoading>
-                  {loadingPhase === 'retrieving' ? 'Retrieving information...' : 'Creating the answer...'}
+                <ChatBubbleMessage variant="received">
+                  <div className="flex items-center gap-2">
+                    <ChatBubbleMessage isLoading />
+                    <span>
+                      {loadingPhase === 'retrieving' ? 'Retrieving information...' : 'Creating the answer...'}
+                    </span>
+                  </div>
                 </ChatBubbleMessage>
               </ChatBubble>
             )}
