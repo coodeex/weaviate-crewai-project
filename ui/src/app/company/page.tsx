@@ -37,13 +37,14 @@ function CompanyDescription({ className }: CompanyDescriptionProps) {
       });
 
       const data = await response.json();
+      console.log(data);
 
-      if (data.error) {
-        setError(data.error);
-        setDescription("");
-      } else {
-        setDescription(data.description);
-      }
+      // if (data.error) {
+      //   setError(data.error);
+      //   setDescription("");
+      // } else {
+      //   setDescription(data.description);
+      // }
     } catch (err) {
       setError("Failed to fetch company description. Please try again.");
       setDescription("");
@@ -51,6 +52,13 @@ function CompanyDescription({ className }: CompanyDescriptionProps) {
       setIsLoading(false);
     }
   };
+
+  // console.log("CompanyDescription");
+  // console.log(companyName);
+  // const a = 1;
+  // if (a === 1) {
+  //   return <div>Hello</div>;
+  // }
 
   return (
     <div className={cn("w-full max-w-3xl mx-auto space-y-6", className)}>
