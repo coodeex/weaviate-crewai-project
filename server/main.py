@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-from server.weaviate_calibrate_companies import query_weaviate_agent
+from weaviate_calibrate_companies import query_weaviate_agent
+from crew.src.company_description_retrieval_automation.crew import CompanyDescriptionRetrievalAutomationCrew
 
 app = FastAPI()
 
@@ -17,6 +18,9 @@ app.add_middleware(
 class ChatRequest(BaseModel):
     message: str
 
+class CompanyRequest(BaseModel):
+    company_name: str
+
 class ChatResponse(BaseModel):
     response: str
 
@@ -24,6 +28,15 @@ class ChatResponse(BaseModel):
 async def chat_endpoint(req: ChatRequest):
     resp = query_weaviate_agent(req.message)
     return ChatResponse(response=resp)
+
+@app.post("/company-description")
+async def get_company_description(request: CompanyRequest):
+    try:
+        crew = CompanyDescriptionRetrievalAutomationCrew()
+        result = crew.crew().kickoff(inputs={'company_name': request.company_name})
+        return {"description": result}
+    except Exception as e:
+        return {"error": str(e)}
 
 @app.get("/")
 async def root():

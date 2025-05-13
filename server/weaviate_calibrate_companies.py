@@ -5,7 +5,7 @@ from weaviate.classes.config import Configure, Property, DataType
 from weaviate.agents.query import QueryAgent
 from weaviate.agents.utils import print_query_agent_response
 from dotenv import load_dotenv
-from server.company_data import COMPANY_DATA
+from company_data import COMPANY_DATA
 import argparse
 
 # Load environment variables
