@@ -3,6 +3,7 @@
 import * as React from "react";
 import { useId, useState } from "react";
 import { cn } from "@/lib/utils";
+// @ts-ignore
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
@@ -74,6 +75,7 @@ function CompanyDescription({ className }: CompanyDescriptionProps) {
               id={id} 
               placeholder="Enter company name" 
               value={companyName}
+              // @ts-ignore
               onChange={(e) => setCompanyName(e.target.value)}
               className="pr-10"
             />

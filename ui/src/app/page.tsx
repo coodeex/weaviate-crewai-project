@@ -6,11 +6,36 @@ import { ChatBubble, ChatBubbleAvatar, ChatBubbleMessage } from '@/components/ui
 import { ChatMessageList } from '@/components/ui/chat-message-list';
 import { ChatInput } from '@/components/ui/chat-input';
 
+interface ChatResponse {
+  original_query: string;
+  collection_names: string[];
+  searches: Array<{
+    queries: string[];
+    filters: any[][];
+    filter_operators: string;
+    collection: string;
+  }>;
+  usage: {
+    requests: number;
+    request_tokens: number;
+    response_tokens: number;
+    total_tokens: number;
+    details: any;
+  };
+  total_time: number;
+  final_answer: string;
+  sources: Array<{
+    object_id: string;
+    collection: string;
+  }>;
+}
+
 export default function ChatPage() {
   // State for user input and chat history
   const [input, setInput] = useState('');
-  const [messages, setMessages] = useState<{ role: 'user' | 'bot'; text: string }[]>([]);
+  const [messages, setMessages] = useState<{ role: 'user' | 'bot'; text: string; fullResponse?: ChatResponse }[]>([]);
   const [loading, setLoading] = useState(false);
+  const [devMode, setDevMode] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   // Scroll to bottom when messages change
@@ -19,6 +44,12 @@ export default function ChatPage() {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages, loading]);
+
+  // Function to parse final answer from response string
+  const parseFinalAnswer = (response: string) => {
+    const match = response.match(/final_answer='([^']+)'/);
+    return match ? match[1] : response;
+  };
 
   // Handle sending a message
   async function handleSend(e?: React.FormEvent) {
@@ -36,7 +67,15 @@ export default function ChatPage() {
       });
       if (!res.ok) throw new Error('Network response was not ok');
       const data = await res.json();
-      setMessages((msgs) => [...msgs, { role: 'bot', text: data.response }]);
+      
+      // Parse the final answer from the response
+      const finalAnswer = parseFinalAnswer(data.response);
+      
+      setMessages((msgs) => [...msgs, { 
+        role: 'bot', 
+        text: finalAnswer,
+        fullResponse: data.response
+      }]);
     } catch (err: any) {
       setMessages((msgs) => [...msgs, { role: 'bot', text: 'Error: ' + (err.message || 'Unknown error') }]);
     } finally {
@@ -55,6 +94,27 @@ export default function ChatPage() {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-zinc-900 via-zinc-800 to-zinc-900 p-4">
       <div className="w-full max-w-xl bg-zinc-950/80 rounded-2xl shadow-2xl p-0 flex flex-col gap-0 border border-zinc-800">
+        {/* Mode Toggle */}
+        <div className="p-2 border-b border-zinc-800">
+          <div className="flex justify-end gap-2">
+            <Button
+              variant={devMode ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setDevMode(false)}
+              className={!devMode ? "bg-violet-600 text-white" : ""}
+            >
+              Normal
+            </Button>
+            <Button
+              variant={devMode ? "secondary" : "ghost"}
+              size="sm"
+              onClick={() => setDevMode(true)}
+              className={devMode ? "bg-violet-600 text-white" : ""}
+            >
+              Dev Mode
+            </Button>
+          </div>
+        </div>
         {/* Chat messages */}
         <div className="flex-1 min-h-[400px] max-h-[600px] h-[400px] overflow-y-auto px-2 py-4">
           <ChatMessageList>
@@ -67,7 +127,13 @@ export default function ChatPage() {
                   fallback={msg.role === 'user' ? 'U' : 'A'}
                 />
                 <ChatBubbleMessage variant={msg.role === 'user' ? 'sent' : 'received'}>
-                  {msg.text}
+                  {msg.role === 'bot' && devMode && msg.fullResponse ? (
+                    <pre className="whitespace-pre-wrap overflow-x-auto">
+                      {JSON.stringify(msg.fullResponse, null, 2)}
+                    </pre>
+                  ) : (
+                    msg.text
+                  )}
                 </ChatBubbleMessage>
               </ChatBubble>
             ))}

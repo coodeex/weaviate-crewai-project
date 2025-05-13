@@ -118,5 +118,102 @@ COMPANY_DATA = {
                 "sources": []
             }
         ]
+    },
+    "canva": {
+        "company_info": {
+            "name": "Canva",
+            "description": "Canva is an Australian-based online design and publishing platform founded in 2013 by Melanie Perkins, Cliff Obrecht, and Cameron Adams. Its mission is to empower everyone to design anything and publish anywhere. With a user-friendly drag-and-drop interface, Canva enables users to create a wide range of visual content, including social media graphics, presentations, posters, and more. As of 2024, Canva boasts over 220 million monthly active users across 190 countries and supports more than 100 languages.",
+            "founded_year": 2013,
+            "founders": ["Melanie Perkins", "Cliff Obrecht", "Cameron Adams"],
+            "location": "Australia",
+            "active_users": "220 million monthly",
+            "global_reach": {
+                "countries": 190,
+                "languages": "100+"
+            },
+            "sources": ["Wikipedia", "Canva"]
+        },
+        "products": [
+            {
+                "name": "Canva Free",
+                "description": "Offers a wide array of templates and design tools accessible to all users at no cost.",
+                "type": "Free",
+                "sources": []
+            },
+            {
+                "name": "Canva Pro",
+                "description": "A subscription-based plan providing advanced features such as brand kits, premium templates, and enhanced collaboration tools.",
+                "type": "Subscription",
+                "sources": []
+            },
+            {
+                "name": "Canva for Teams",
+                "description": "Designed for team collaboration, allowing multiple users to work together on designs with shared brand assets and workflows.",
+                "type": "Team Subscription",
+                "sources": []
+            },
+            {
+                "name": "Canva for Education",
+                "description": "A free offering for schools and educational institutions, providing tools for teachers and students to collaborate and create educational content.",
+                "type": "Free for Education",
+                "sources": []
+            },
+            {
+                "name": "Canva for Nonprofits",
+                "description": "Provides eligible nonprofit organizations with free access to premium Canva features to support their missions.",
+                "type": "Free for Nonprofits",
+                "sources": []
+            },
+            {
+                "name": "Canva Enterprise",
+                "description": "Tailored for large organizations, offering advanced security, brand management, and administrative controls.",
+                "type": "Enterprise",
+                "sources": []
+            },
+            {
+                "name": "Canva Print",
+                "description": "Enables users to print their designs on various physical products, such as business cards, flyers, and apparel, and have them delivered.",
+                "type": "Service",
+                "sources": []
+            },
+            {
+                "name": "Magic Studio",
+                "description": "A suite of AI-powered tools, including Magic Design for generating design suggestions, Magic Write for AI text generation, and Magic Media for transforming text prompts into images and videos.",
+                "type": "AI Tools Suite",
+                "features": [
+                    "Magic Design",
+                    "Magic Write",
+                    "Magic Media"
+                ],
+                "sources": []
+            }
+        ],
+        "use_cases": [
+            {
+                "name": "Social Media Content",
+                "description": "Creating engaging posts, stories, and advertisements.",
+                "sources": []
+            },
+            {
+                "name": "Marketing Materials",
+                "description": "Designing brochures, flyers, and promotional items.",
+                "sources": []
+            },
+            {
+                "name": "Educational Resources",
+                "description": "Developing presentations, worksheets, and lesson plans.",
+                "sources": []
+            },
+            {
+                "name": "Business Documents",
+                "description": "Crafting reports, proposals, and branded communications.",
+                "sources": []
+            },
+            {
+                "name": "Print Products",
+                "description": "Designing and ordering physical items like business cards and merchandise.",
+                "sources": []
+            }
+        ]
     }
 } 
