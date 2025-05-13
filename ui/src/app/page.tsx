@@ -182,6 +182,24 @@ export default function ChatPage() {
           </form>
         </div>
       </div>
+      <div className="w-full max-w-xl mt-4 flex flex-wrap gap-2 justify-center">
+        {[
+          "What does Weaviate company do?",
+          "What are use cases for Canva?",
+          "What does Google do?",
+          "What are the products of LlamaIndex?"
+        ].map((query, idx) => (
+          <Button
+            key={idx}
+            variant="outline"
+            size="sm"
+            className="text-zinc-200 hover:text-white border-zinc-800 bg-zinc-900 hover:bg-zinc-800"
+            onClick={() => setInput(query)}
+          >
+            {query}
+          </Button>
+        ))}
+      </div>
     </div>
   );
 }
